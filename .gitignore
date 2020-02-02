@@ -1,0 +1,9 @@
+*.class
+*.log
+*.sc
+.idea
+target/
+.DS_Store
+db/
+.sbtserver
+project/.sbtserver.lock
