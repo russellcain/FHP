@@ -23,22 +23,23 @@ trait Tables {
    *  @param name Database column Name SqlType(varchar), Length(150,true)
    *  @param teamId Database column Team_ID SqlType(int8)
    *  @param position Database column Position SqlType(varchar), Length(5,true)
-   *  @param salary Database column Salary SqlType(int8), Default(None)
+   *  @param number Database column Number SqlType(int8)
    *  @param ownedby Database column OwnedBy SqlType(int8), Default(None)
    *  @param goals Database column Goals SqlType(int8), Default(None)
    *  @param assists Database column Assists SqlType(int8), Default(None)
-   *  @param wins Database column Wins SqlType(int8), Default(None) */
-  case class PlayersRow(playerPkid: Long, name: String, teamId: Long, position: String, salary: Option[Long] = None, ownedby: Option[Long] = None, goals: Option[Long] = None, assists: Option[Long] = None, wins: Option[Long] = None)
+   *  @param wins Database column Wins SqlType(int8), Default(None)
+   *  @param salary Database column Salary SqlType(int8), Default(None) */
+  case class PlayersRow(playerPkid: Long, name: String, teamId: Long, position: String, number: Long, ownedby: Option[Long] = None, goals: Option[Long] = None, assists: Option[Long] = None, wins: Option[Long] = None, salary: Option[Long] = None)
   /** GetResult implicit for fetching PlayersRow objects using plain SQL queries */
   implicit def GetResultPlayersRow(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[Long]]): GR[PlayersRow] = GR{
     prs => import prs._
-    PlayersRow.tupled((<<[Long], <<[String], <<[Long], <<[String], <<?[Long], <<?[Long], <<?[Long], <<?[Long], <<?[Long]))
+    PlayersRow.tupled((<<[Long], <<[String], <<[Long], <<[String], <<[Long], <<?[Long], <<?[Long], <<?[Long], <<?[Long], <<?[Long]))
   }
-  /** Table description of table Players. Objects of this class serve as prototypes for rows in queries. */
-  class Players(_tableTag: Tag) extends profile.api.Table[PlayersRow](_tableTag, Some("local"), "Players") {
-    def * = (playerPkid, name, teamId, position, salary, ownedby, goals, assists, wins) <> (PlayersRow.tupled, PlayersRow.unapply)
+  /** Table description of table players. Objects of this class serve as prototypes for rows in queries. */
+  class Players(_tableTag: Tag) extends profile.api.Table[PlayersRow](_tableTag, Some("local"), "players") {
+    def * = (playerPkid, name, teamId, position, number, ownedby, goals, assists, wins, salary) <> (PlayersRow.tupled, PlayersRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = ((Rep.Some(playerPkid), Rep.Some(name), Rep.Some(teamId), Rep.Some(position), salary, ownedby, goals, assists, wins)).shaped.<>({r=>import r._; _1.map(_=> PlayersRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7, _8, _9)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = ((Rep.Some(playerPkid), Rep.Some(name), Rep.Some(teamId), Rep.Some(position), Rep.Some(number), ownedby, goals, assists, wins, salary)).shaped.<>({r=>import r._; _1.map(_=> PlayersRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6, _7, _8, _9, _10)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column PLAYER_PKID SqlType(int8), PrimaryKey */
     val playerPkid: Rep[Long] = column[Long]("PLAYER_PKID", O.PrimaryKey)
@@ -48,8 +49,8 @@ trait Tables {
     val teamId: Rep[Long] = column[Long]("Team_ID")
     /** Database column Position SqlType(varchar), Length(5,true) */
     val position: Rep[String] = column[String]("Position", O.Length(5,varying=true))
-    /** Database column Salary SqlType(int8), Default(None) */
-    val salary: Rep[Option[Long]] = column[Option[Long]]("Salary", O.Default(None))
+    /** Database column Number SqlType(int8) */
+    val number: Rep[Long] = column[Long]("Number")
     /** Database column OwnedBy SqlType(int8), Default(None) */
     val ownedby: Rep[Option[Long]] = column[Option[Long]]("OwnedBy", O.Default(None))
     /** Database column Goals SqlType(int8), Default(None) */
@@ -58,6 +59,8 @@ trait Tables {
     val assists: Rep[Option[Long]] = column[Option[Long]]("Assists", O.Default(None))
     /** Database column Wins SqlType(int8), Default(None) */
     val wins: Rep[Option[Long]] = column[Option[Long]]("Wins", O.Default(None))
+    /** Database column Salary SqlType(int8), Default(None) */
+    val salary: Rep[Option[Long]] = column[Option[Long]]("Salary", O.Default(None))
   }
   /** Collection-like TableQuery object for table Players */
   lazy val Players = new TableQuery(tag => new Players(tag))
@@ -74,8 +77,8 @@ trait Tables {
     prs => import prs._
     TeamsRow.tupled((<<[Long], <<[String], <<[Long], <<[Long], <<[String]))
   }
-  /** Table description of table Teams. Objects of this class serve as prototypes for rows in queries. */
-  class Teams(_tableTag: Tag) extends profile.api.Table[TeamsRow](_tableTag, Some("local"), "Teams") {
+  /** Table description of table teams. Objects of this class serve as prototypes for rows in queries. */
+  class Teams(_tableTag: Tag) extends profile.api.Table[TeamsRow](_tableTag, Some("local"), "teams") {
     def * = (teamPkid, name, points, cap, playerIds) <> (TeamsRow.tupled, TeamsRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = ((Rep.Some(teamPkid), Rep.Some(name), Rep.Some(points), Rep.Some(cap), Rep.Some(playerIds))).shaped.<>({r=>import r._; _1.map(_=> TeamsRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
@@ -106,8 +109,8 @@ trait Tables {
     prs => import prs._
     UsersRow.tupled((<<[Long], <<[String], <<[String], <<[String], <<?[Long]))
   }
-  /** Table description of table Users. Objects of this class serve as prototypes for rows in queries. */
-  class Users(_tableTag: Tag) extends profile.api.Table[UsersRow](_tableTag, Some("local"), "Users") {
+  /** Table description of table users. Objects of this class serve as prototypes for rows in queries. */
+  class Users(_tableTag: Tag) extends profile.api.Table[UsersRow](_tableTag, Some("local"), "users") {
     def * = (userPkid, username, password, email, teamid) <> (UsersRow.tupled, UsersRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = ((Rep.Some(userPkid), Rep.Some(username), Rep.Some(password), Rep.Some(email), teamid)).shaped.<>({r=>import r._; _1.map(_=> UsersRow.tupled((_1.get, _2.get, _3.get, _4.get, _5)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))

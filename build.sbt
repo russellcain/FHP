@@ -23,6 +23,8 @@ lazy val root = (project in file("."))
       "org.postgresql"              % "postgresql"                 % "42.2.5",
       "ch.qos.logback"              % "logback-classic"            % "1.2.3",
       "org.scalatest"              %% "scalatest"                  % "3.0.5" % Test,
+
+      "com.typesafe.play"          %% "play-json"                  % "2.8.1",
     ),
 //    excludeDependencies += "org.slf4j" % "slf4j-log4j12",
   )
