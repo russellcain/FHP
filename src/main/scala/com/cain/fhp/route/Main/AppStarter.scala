@@ -4,6 +4,8 @@ import akka.NotUsed
 import akka.actor.ActorRef
 import akka.http.scaladsl.Http
 import com.cain.fhp.util.marshalling.AppStarterMarshaller
+
+import scala.concurrent.Future
 //import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
 //import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
@@ -39,10 +41,15 @@ object AppStarter extends App with AkkaService with Persistence with CorsSupport
             path(LongNumber) { id => {
               get {
                 println(s"pulling in stats for player id: ${id}")
-//                val resp: Source[PlayersRow, NotUsed] = streaming(PlayerPersistence.byId(id))
-                val fakeResp: PlayersRow = new PlayersRow(playerPkid = 1, name = "Fake Player", number = 24, teamId = 4, position = "G")
-//                complete(s"Here is your data for player #${id}: \n\t--TODO--")
-                complete(fakeResp)
+                val resp = PlayerPersistence.readSingle(PlayerPersistence.byId(id))
+                val finalResp = resp.map{
+                  case Some(retrievedRow) => {
+                    println(s"going to send back $retrievedRow")
+                    Future(retrievedRow)
+                  }
+                  case None => Future(PlayersRow(playerPkid = 1, name = "Fake Player", number = 24, teamId = 4, position = "G"))
+                }.mapTo[Future[PlayersRow]]
+                complete(finalResp)
               }
             }}
           )

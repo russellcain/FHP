@@ -14,7 +14,9 @@ object PlayerPersistence extends Persistence {
   }
 
   def byId(playerPkid: Long): Query[Tables.Players, Tables.PlayersRow, Seq] = {
-    playersTable.filter(_.playerPkid === playerPkid)
+    val returnedPlayer = playersTable.filter(_.playerPkid === playerPkid)
+    println("FOUND:",returnedPlayer)
+    returnedPlayer
   }
 
   def add(players: Tables.PlayersRow): DBIO[Long] = {
