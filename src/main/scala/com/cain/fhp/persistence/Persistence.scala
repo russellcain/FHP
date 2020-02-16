@@ -1,6 +1,7 @@
 package com.cain.fhp.persistence
 
 import akka.stream.ThrottleMode
+import akka.stream.alpakka.slick.javadsl.SlickSession
 import akka.{Done, NotUsed}
 import akka.stream.alpakka.slick.scaladsl.Slick
 import akka.stream.scaladsl.{Sink, Source}
@@ -18,6 +19,7 @@ import scala.concurrent.{Await, Future}
 trait Persistence {
 
   import session.profile.api._
+//  implicit val session = SlickSession.forConfig("slick-postgres.profile")
 
   lazy val FETCH_PAGE_SIZE = 100
 

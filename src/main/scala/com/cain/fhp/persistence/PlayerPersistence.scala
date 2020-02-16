@@ -1,11 +1,13 @@
 package com.cain.fhp.persistence
 
 import com.cain.fhp.route.Main.AppStarter._
+import slick.profile._
 
 
 object PlayerPersistence extends Persistence {
 
   import session.profile.api._
+  import slick.driver._
 
   val playersTable = Tables.Players
 
@@ -16,6 +18,12 @@ object PlayerPersistence extends Persistence {
   def byId(playerPkid: Long): Query[Tables.Players, Tables.PlayersRow, Seq] = {
     val returnedPlayer = playersTable.filter(_.playerPkid === playerPkid)
     println("FOUND:",returnedPlayer)
+    returnedPlayer
+  }
+
+  def byLikeName(queryString: String): Query[Tables.Players, Tables.PlayersRow, Seq] = {
+    val returnedPlayer = playersTable.filter(_.name.toLowerCase like s"%${queryString.toLowerCase}%") // wrap in % for SQL like
+    println("FOUND player? ", returnedPlayer.exists)
     returnedPlayer
   }
 

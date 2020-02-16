@@ -3,6 +3,7 @@ package com.cain.fhp.route.Main
 import akka.NotUsed
 import akka.actor.ActorRef
 import akka.http.scaladsl.Http
+import com.cain.fhp.util.general.Requests.QueryName
 import com.cain.fhp.util.marshalling.AppStarterMarshaller
 
 import scala.concurrent.Future
@@ -51,9 +52,20 @@ object AppStarter extends App with AkkaService with Persistence with CorsSupport
                 }.mapTo[Future[PlayersRow]]
                 complete(finalResp)
               }
-            }}
-          )
-        },
+            }},
+            get {
+              entity(as[QueryName]) { queryString =>
+                val resp = PlayerPersistence.readSingle(PlayerPersistence.byLikeName(queryString.name))
+                val finalResp = resp.map{
+                  case Some(retrievedRow) => {
+                    println(s"going to send back $retrievedRow")
+                    Future(retrievedRow)
+                  }
+                  case None => Future(PlayersRow(playerPkid = 1, name = "Fake Player", number = 24, teamId = 4, position = "G"))
+                }.mapTo[Future[PlayersRow]]
+                complete(finalResp)
+              }
+        })},
         pathPrefix("user") {
           concat(
             path(LongNumber) { id => {
