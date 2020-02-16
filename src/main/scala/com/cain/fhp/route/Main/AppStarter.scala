@@ -3,26 +3,27 @@ package com.cain.fhp.route.Main
 import akka.NotUsed
 import akka.actor.ActorRef
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import com.cain.fhp.util.marshalling.AppStarterMarshaller
+//import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
+//import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.routing.RoundRobinPool
 import akka.stream.scaladsl.Source
-import com.cain.fhp.persistence.{Persistence, PlayerPersistence, UserPersistence}
+//import com.cain.fhp.persistence.{Persistence, PlayerPersistence, UserPersistence}
 import com.cain.fhp.persistence.application.Database
-import com.cain.fhp.util.AkkaService
-import com.cain.fhp.util.general.{ConfigHelper, CorsSupport}
+//import com.cain.fhp.util.AkkaService
+//import com.cain.fhp.util.general.{ConfigHelper, CorsSupport}
 import com.typesafe.scalalogging.LazyLogging
-import spray.json._
+//import spray.json._
 import com.cain.fhp.persistence.{Persistence, PlayerPersistence, UserPersistence}
 import com.cain.fhp.util.general.{ConfigHelper, CorsSupport}
 import com.cain.fhp.util.AkkaService
 import com.cain.fhp.persistence.Tables._
 
-import scala.util.{Failure, Success, Try}
+//import scala.util.{Failure, Success, Try}
 
-object AppStarter extends App with AkkaService with Persistence with CorsSupport with LazyLogging {
+object AppStarter extends App with AkkaService with Persistence with CorsSupport with LazyLogging with AppStarterMarshaller {
 
   private val RoundRobinNumber = ConfigHelper.getIntValue("actor.roundRobin")
 
@@ -38,8 +39,10 @@ object AppStarter extends App with AkkaService with Persistence with CorsSupport
             path(LongNumber) { id => {
               get {
                 println(s"pulling in stats for player id: ${id}")
-                val resp: Source[PlayersRow, NotUsed] = streaming(PlayerPersistence.byId(id))
-                complete(s"Here is your data for player #${id}: \n\t--TODO--")
+//                val resp: Source[PlayersRow, NotUsed] = streaming(PlayerPersistence.byId(id))
+                val fakeResp: PlayersRow = new PlayersRow(playerPkid = 1, name = "Fake Player", number = 24, teamId = 4, position = "G")
+//                complete(s"Here is your data for player #${id}: \n\t--TODO--")
+                complete(fakeResp)
               }
             }}
           )
