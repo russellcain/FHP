@@ -1,5 +1,6 @@
-package com.cain.persistence
-import com.cain.route.Main.AppStarter._
+package com.cain.fhp.persistence
+
+import com.cain.fhp.route.Main.AppStarter._
 
 
 object UserPersistence extends Persistence {

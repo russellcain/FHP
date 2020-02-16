@@ -1,4 +1,4 @@
-package com.cain.util.marshallers
+package com.cain.fhp.util.marshalling
 
 import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport

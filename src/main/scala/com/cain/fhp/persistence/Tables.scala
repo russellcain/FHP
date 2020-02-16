@@ -1,4 +1,5 @@
-package com.cain.persistence
+package com.cain.fhp.persistence
+
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
 object Tables extends {

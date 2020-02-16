@@ -1,16 +1,17 @@
-package com.cain.persistence.application
+package com.cain.fhp.persistence.application
 
-import akka.NotUsed
+//import akka.NotUsed
 import akka.actor.{Actor, ActorRef, Props}
-import akka.stream.scaladsl.Source
-import com.cain.route.Main.AppStarter.{ec, materializer}
-import com.cain.persistence.Tables.{PlayersRow}
-import com.cain.persistence._
-import com.cain.persistence.application.Database.commitData
+//import akka.stream.scaladsl.Source
+import com.cain.fhp.route.Main.AppStarter.{ec, materializer}
+import com.cain.fhp.persistence.Tables.PlayersRow
+import com.cain.fhp.persistence._
+import Database.commitData
+import com.cain.fhp.persistence.PlayerPersistence
 import com.typesafe.scalalogging.LazyLogging
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
+//import scala.concurrent.Await
+//import scala.concurrent.duration._
 import scala.util.{Failure, Random, Success}
 
 

@@ -1,9 +1,9 @@
-package com.cain.util.general
+package com.cain.fhp.util.general
 
 import com.typesafe.config.{Config, ConfigFactory}
 
 import scala.collection.JavaConverters._
-import com.cain.route.Main.AppStarter.system
+import com.cain.fhp.route.Main.AppStarter.system
 
 object ConfigHelper {
 

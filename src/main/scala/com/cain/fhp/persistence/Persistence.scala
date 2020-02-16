@@ -1,10 +1,11 @@
-package com.cain.persistence
+package com.cain.fhp.persistence
 
 import akka.stream.ThrottleMode
 import akka.{Done, NotUsed}
 import akka.stream.alpakka.slick.scaladsl.Slick
 import akka.stream.scaladsl.{Sink, Source}
-import com.cain.route.Main.AppStarter._
+import com.cain.fhp.route.Main.AppStarter._
+import slick.dbio.Effect.Read
 import slick.jdbc.{ResultSetConcurrency, ResultSetType}
 import slick.sql.FixedSqlStreamingAction
 
@@ -45,7 +46,7 @@ trait Persistence {
     * @tparam T: Result type of query
     * @return Slick query as streamed, transactional result
     */
-  def streamingSQL[T](q: FixedSqlStreamingAction[Seq[T], T, Effect.Read]): StreamingDBIO[Seq[T], T] = {
+  def streamingSQL[T](q: FixedSqlStreamingAction[Seq[T], T, Read]): StreamingDBIO[Seq[T], T] = {
     q
       .withStatementParameters(
         rsType = ResultSetType.ForwardOnly,

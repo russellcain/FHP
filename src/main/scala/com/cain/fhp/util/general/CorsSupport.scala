@@ -1,4 +1,4 @@
-package com.cain.util.general
+package com.cain.fhp.util.general
 
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.headers._
@@ -13,7 +13,7 @@ trait CorsSupport {
   final val SERVICE_TABLE = "DP_ServiceAuth"
 
   //this directive adds access control headers to normal responses
-  private def addAccessControlHeaders: Directive0 = {
+  private def addAccessControlHeaders(): Directive0 = {
     respondWithHeaders(
       allowedOrigin,
       `Access-Control-Allow-Credentials`(true),
@@ -28,7 +28,7 @@ trait CorsSupport {
     complete(HttpResponse(StatusCodes.OK).withHeaders(`Access-Control-Allow-Methods`(OPTIONS, POST, PUT, GET, DELETE)))
   }
 
-  def corsHandler(r: Route) = addAccessControlHeaders {
+  def corsHandler(r: Route): Route = addAccessControlHeaders() {
     preflightRequestHandler ~ r
   }
 

@@ -1,4 +1,4 @@
-package com.cain.route.Main
+package com.cain.fhp.route.Main
 
 import akka.NotUsed
 import akka.actor.ActorRef
@@ -9,14 +9,16 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.routing.RoundRobinPool
 import akka.stream.scaladsl.Source
+import com.cain.fhp.persistence.{Persistence, PlayerPersistence, UserPersistence}
+import com.cain.fhp.persistence.application.Database
+import com.cain.fhp.util.AkkaService
+import com.cain.fhp.util.general.{ConfigHelper, CorsSupport}
 import com.typesafe.scalalogging.LazyLogging
 import spray.json._
-import com.cain.persistence.application.Database
-import com.cain.persistence.{UserPersistence, PlayerPersistence, Persistence}
-import com.cain.util.general.{ConfigHelper, CorsSupport}
-import com.cain.util.AkkaService
-
-import com.cain.persistence.Tables._
+import com.cain.fhp.persistence.{Persistence, PlayerPersistence, UserPersistence}
+import com.cain.fhp.util.general.{ConfigHelper, CorsSupport}
+import com.cain.fhp.util.AkkaService
+import com.cain.fhp.persistence.Tables._
 
 import scala.util.{Failure, Success, Try}
 
