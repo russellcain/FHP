@@ -37,7 +37,7 @@ object AppStarter extends App with AkkaService with Persistence with CorsSupport
               get {
                 println(s"pulling in stats for player id: ${id}")
                 val resp: Source[PlayersRow, NotUsed] = streaming(PlayerPersistence.byId(id))
-                complete(s"Here is your data for player #${id}: \n\t--TODO--")
+                complete(s"Here is your data for player #${id}: \n\t${resp}")
               }
             }}
           )

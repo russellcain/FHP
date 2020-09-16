@@ -8,6 +8,7 @@ lazy val commonSettings = Seq(
   version := "0.1",
   scalaVersion := "2.12.8"
 )
+scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.4")
 
 lazy val root = (project in file("."))
   .settings(
@@ -18,11 +19,11 @@ lazy val root = (project in file("."))
       "com.typesafe.akka"          %% "akka-http-spray-json"       % "10.1.3",
       "com.typesafe.akka"          %% "akka-stream-kafka"          % "1.0.4",
       "com.typesafe.scala-logging" %% "scala-logging"              % "3.9.2",
-      // "com.typesafe.slick"         %% "slick-codegen"              % "3.3.0",
+       "com.typesafe.slick"         %% "slick-codegen"              % "3.3.0",
       "com.lightbend.akka"         %% "akka-stream-alpakka-slick"  % "1.0-RC1",
       "org.postgresql"              % "postgresql"                 % "42.2.5",
       "ch.qos.logback"              % "logback-classic"            % "1.2.3",
       "org.scalatest"              %% "scalatest"                  % "3.0.5" % Test,
     ),
-//    excludeDependencies += "org.slf4j" % "slf4j-log4j12",
+    excludeDependencies += "org.slf4j" % "slf4j-log4j12",
   )
