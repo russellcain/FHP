@@ -63,11 +63,11 @@ object Scraper extends LazyLogging {
   val starterList: List[TransactionRow] = getToTransactionRows(baseURL)
 
   def parallelPageRetrieval(urlList: List[String], parallelismCount: Int = 150): ParSeq[TransactionRow] = {
-    val parMap: ParSeq[String] = urlList.par
-    parMap.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(parallelismCount))
-    parMap.flatMap(url => {
+    val parMap: ParSeq[String] = urlList.par // make this a parallel sequence
+    parMap.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(parallelismCount)) // which can be operated upon with this number of threads
+    parMap.flatMap(url => { // flat map it so we end up with a mega (~50 per page) list of TransactionRows
       val pageRows = getToTransactionRows(url)
-      println(s"Consumed ${pageRows.length} rows between ${pageRows.last.date} and ${pageRows.head.date}")
+      println(s"Consumed ${pageRows.length} rows between ${pageRows.last.date} and ${pageRows.head.date}") // logging
       pageRows
     })
 
