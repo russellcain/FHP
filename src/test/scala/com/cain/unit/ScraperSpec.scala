@@ -9,15 +9,17 @@ class ScraperSpec extends FreeSpec {
 
   "Scraper testing" - {
     "lets get our first page" in {
-//      for( row <- testScraper.starterList) println(s"\n- Date: ${row.date}\tTeam: ${row.team}\n\tEvent: ${row.record.stripSuffix(row.date).stripPrefix(row.date).strip()}")
+      testScraper.starterList
     }
 
     "lets see if our list for all pages rendered" in {
-//      testScraper.pageExtensions.foreach(println)
+      testScraper.pageExtensions.slice(0, 3).foreach(println)
+      println("...")
+      testScraper.pageExtensions.takeRight(3).foreach(println)
     }
 
     "and lets get all results for all pages" in {
-      testScraper.fuckShitUPPP(testScraper.pageExtensions)
+      testScraper.parallelPageRetrieval(testScraper.pageExtensions)
     }
 
   }

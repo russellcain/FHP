@@ -7,25 +7,34 @@ import org.jsoup.nodes.Element
 import collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.parallel.{ForkJoinTaskSupport, ParSeq}
-import scala.collection.parallel.immutable.ParMap
-
-case class TransactionRow(team: String, record: String, date: String)
 
 object Scraper extends LazyLogging {
 
+  case class TransactionRow(team: String, record: String, date: String)
+
   def getToTransactionRows(url: String): List[TransactionRow] = {
-    val doc = Jsoup.connect(url).get()
-    val transactionRowElements: mutable.Buffer[Element] = doc.getElementsByClass("table table-hover table-striped").select("tr").asScala
-    // table is a Buffer comprised of
-    val sampleRow: String =
-      """<tr>
-        | <td><a href="/team/edmonton-oilers"><img class="team-sm" title="Edmonton Oilers" alt="Edmonton Oilers logo" src="/sites/default/files/logos/edmonton-oilers_0.svg" typeof="foaf:Image"> </a></td>
-        | <td>
-        |  <div class="only-mobile">
-        |   2020-09-21
-        |  </div> <a href="/team/"> </a> assigned LW <a href="/player/tyler-benson">Tyler Benson</a> to GCK Lions (Sweden). </td>
-        | <td class="text-nowrap no-mobile">2020-09-21</td>
-        |</tr>""".stripMargin
+    val transactionRowElements: mutable.Buffer[Element] = Jsoup
+      .connect(url).get()
+      .getElementsByClass("table table-hover table-striped") // go to the transaction table
+      .select("tr") // select all the individual rows which are children
+      .asScala // turn this into a scala collection so we can map over them
+
+    /*
+    <tr>
+       <td>
+          <a href="/team/edmonton-oilers"><img class="team-sm" title="Edmonton Oilers" alt="Edmonton Oilers logo" src="/sites/default/files/logos/edmonton-oilers_0.svg" typeof="foaf:Image"> </a>
+        </td>
+       <td>
+          <div class="only-mobile">
+            2020-09-21
+          </div>
+          <a href="/team/"> </a> assigned LW <a href="/player/tyler-benson">Tyler Benson</a> to GCK Lions (Sweden).
+        </td>
+       <td class="text-nowrap no-mobile">
+          2020-09-21
+        </td>
+    </tr>
+     */
 
 
     transactionRowElements.map(el => {
@@ -37,23 +46,32 @@ object Scraper extends LazyLogging {
     }).toList
   }
 
+  def getPageMax: Int = {
+    Jsoup.connect(baseURL)
+      .get() // pull in HTML
+      .getElementsByClass("pager__item pager__item--last") // go down to the page selection at the bottom (last one)
+      .select("a") // get the main tag
+      .attr("href") // pull in the href attribute (is `?page={THE_NUMBER_WE_WANT)`)
+      .takeRight(3) // grab the last three characters (guess it could be two, kinda risky)
+      .toInt // trust that this can marshall to an int (would fail if we pulled in a real char)
+  }
+
   val baseURL: String = "https://puckpedia.com/transactions"
-  val upperPageCount: Int = 643 // todo: pull this from the main page selection url redirect
-  val starterList = getToTransactionRows(baseURL)
+  val upperPageCount: Int = getPageMax
+  val pageExtensions: List[String] = (for (i <- 1 to upperPageCount) yield baseURL + s"?page=$i").toList
 
+  val starterList: List[TransactionRow] = getToTransactionRows(baseURL)
 
-  val pageExtensions: List[String] = (for (i <- 1 until upperPageCount) yield baseURL + s"?page=${i}").toList
-
-  def fuckShitUPPP(urlList: List[String]): Unit = {
+  def parallelPageRetrieval(urlList: List[String], parallelismCount: Int = 150): ParSeq[TransactionRow] = {
     val parMap: ParSeq[String] = urlList.par
-    parMap.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(100))
-    parMap.foreach(url => {
+    parMap.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(parallelismCount))
+    parMap.flatMap(url => {
       val pageRows = getToTransactionRows(url)
       println(s"Consumed ${pageRows.length} rows between ${pageRows.last.date} and ${pageRows.head.date}")
+      pageRows
     })
 
   }
-
 
 
 }
