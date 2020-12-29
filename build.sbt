@@ -30,6 +30,9 @@ lazy val root = (project in file("."))
 
       // testing:
       "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+
+      // api marshalling:
+      "org.json4s" %% "json4s-jackson" % "3.6.7",
     ),
     excludeDependencies += "org.slf4j" % "slf4j-log4j12",
   )

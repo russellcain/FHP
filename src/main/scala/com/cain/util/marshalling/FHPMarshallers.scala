@@ -1,11 +1,23 @@
-package com.cain.util.marshallers
+package com.cain.util.marshalling
+import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller}
+import akka.http.scaladsl.model.MediaTypes
+import akka.http.scaladsl.unmarshalling.{FromByteStringUnmarshaller, FromEntityUnmarshaller, Unmarshaller}
+import akka.http.scaladsl.util.FastFuture
+import org.json4s.jackson.{Serialization, parseJson}
 
-import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import spray.json.{DefaultJsonProtocol, JsString, JsValue, JsonFormat, deserializationError}
+trait JSON {
 
-import scala.util.{Failure, Success, Try}
+  implicit val formats:org.json4s.DefaultFormats = org.json4s.DefaultFormats
 
-trait FHPMarshallers extends DefaultJsonProtocol with SprayJsonSupport {
-  // TODO: Fill with implicits jsonFormat< # args >(CaseClasses) for each table thrown through API
+  implicit def genericByteStringUnmarshaller[T](implicit m: Manifest[T]): FromByteStringUnmarshaller[T] =
+    Unmarshaller.withMaterializer(_ => implicit mat => { bs =>
+      FastFuture.successful(parseJson(bs.utf8String).extract[T])
+    })
+
+  implicit def genericUnmarshaller[T](implicit m: Manifest[T]): FromEntityUnmarshaller[T] =
+    Unmarshaller.byteStringUnmarshaller.forContentTypes(MediaTypes.`application/json`).andThen(genericByteStringUnmarshaller)
+
+  implicit def genericMarshaller[T <: AnyRef]: ToEntityMarshaller[T] =
+    Marshaller.StringMarshaller.wrap(MediaTypes.`application/json`)(Serialization.write[T])
+
 }

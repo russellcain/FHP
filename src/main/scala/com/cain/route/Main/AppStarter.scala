@@ -5,26 +5,30 @@ import akka.actor.ActorRef
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.{pathPrefix, _}
 import akka.http.scaladsl.server.Route
 import akka.routing.RoundRobinPool
 import akka.stream.scaladsl.Source
 import com.typesafe.scalalogging.LazyLogging
 import spray.json._
 import com.cain.persistence.application.Database
-import com.cain.persistence.{UserPersistence, PlayerPersistence, Persistence}
+import com.cain.persistence.{Persistence, PlayerPersistence, UserPersistence}
 import com.cain.util.general.{ConfigHelper, CorsSupport}
 import com.cain.util.AkkaService
-
 import com.cain.persistence.Tables._
+import com.cain.trades.Scraper
+import com.cain.trades.Scraper.TransactionRow
+import com.cain.util.marshalling.JSON
+import spray.json.DefaultJsonProtocol._
 
 import scala.util.{Failure, Success, Try}
 
-object AppStarter extends App with AkkaService with Persistence with CorsSupport with LazyLogging {
+object AppStarter extends App with AkkaService with Persistence with CorsSupport with LazyLogging with JSON {
 
   private val RoundRobinNumber = ConfigHelper.getIntValue("actor.roundRobin")
 
   val databaseService: ActorRef = system.actorOf(RoundRobinPool(RoundRobinNumber).props(Database.props), "databaseService")
+  val scraper: Scraper.type = Scraper
 
   val httpMethods = get | put | post | delete | patch
 
@@ -37,7 +41,7 @@ object AppStarter extends App with AkkaService with Persistence with CorsSupport
               get {
                 println(s"pulling in stats for player id: ${id}")
                 val resp: Source[PlayersRow, NotUsed] = streaming(PlayerPersistence.byId(id))
-                complete(s"Here is your data for player #${id}: \n\t${resp}")
+                complete(s"todo: ${id}")//resp)
               }
             }}
           )
@@ -48,9 +52,18 @@ object AppStarter extends App with AkkaService with Persistence with CorsSupport
               get {
                 println(s"pulling in stats for user id: ${id}")
                 val resp: Source[UsersRow, NotUsed] = streaming(UserPersistence.byId(id))
-                complete(s"Here is your data for user id: ${id} \n\t--TODO--")            
+                complete(s"todo: ${id}")//resp)
               }
             }}
+          )
+        },
+        pathPrefix("transactions") {
+          concat(
+            get {
+              println(s"grabbing recent ${scraper.upperPageCount * 50} entries")
+              val resp: List[TransactionRow] = scraper.parallelPageRetrieval(scraper.pageExtensions).toList
+              complete(resp)
+            }
           )
         }
       )

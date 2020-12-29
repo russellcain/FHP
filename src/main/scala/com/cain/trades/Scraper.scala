@@ -57,21 +57,22 @@ object Scraper extends LazyLogging {
   }
 
   val baseURL: String = "https://puckpedia.com/transactions"
-  val upperPageCount: Int = getPageMax
+  val upperPageCount: Int = {
+    val pageCount: Int = 1000 / 50 // getPageMax
+    println(s"upperPageCount: ${pageCount}")
+    pageCount
+  }
   val pageExtensions: List[String] = (for (i <- 1 to upperPageCount) yield baseURL + s"?page=$i").toList
 
-  val starterList: List[TransactionRow] = getToTransactionRows(baseURL)
+//  val starterList: List[TransactionRow] = getToTransactionRows(baseURL)
 
   def parallelPageRetrieval(urlList: List[String], parallelismCount: Int = 150): ParSeq[TransactionRow] = {
     val parMap: ParSeq[String] = urlList.par // make this a parallel sequence
     parMap.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(parallelismCount)) // which can be operated upon with this number of threads
     parMap.flatMap(url => { // flat map it so we end up with a mega (~50 per page) list of TransactionRows
-      val pageRows = getToTransactionRows(url)
+      val pageRows: List[TransactionRow] = getToTransactionRows(url)
       println(s"Consumed ${pageRows.length} rows between ${pageRows.last.date} and ${pageRows.head.date}") // logging
       pageRows
     })
-
   }
-
-
 }

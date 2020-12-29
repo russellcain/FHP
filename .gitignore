@@ -7,3 +7,5 @@ target/
 db/
 .sbtserver
 project/.sbtserver.lock
+*.bloop
+*.metals
