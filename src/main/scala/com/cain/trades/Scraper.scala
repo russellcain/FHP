@@ -11,6 +11,12 @@ import scala.collection.parallel.{ForkJoinTaskSupport, ParSeq}
 object Scraper extends LazyLogging {
 
   case class TransactionRow(team: String, record: String, date: String)
+  case class PageRequest(pageMin: Int = 0, pageMax: Int = 1, parellism: Int = 10) {
+    def apply(pageMin: Int, pageMax: Int, parellism: Int): PageRequest ={
+      val boundedMax = Math.min(pageMax, getPageMax)
+      PageRequest(pageMin, pageMax, parellism)
+    }
+  }
 
   def getToTransactionRows(url: String): List[TransactionRow] = {
     val transactionRowElements: mutable.Buffer[Element] = Jsoup
@@ -38,10 +44,11 @@ object Scraper extends LazyLogging {
 
 
     transactionRowElements.map(el => {
+      val date = el.getElementsByClass("only-mobile").text // because the "only-mobile" divs contain this
       TransactionRow(
         team = el.getElementsByClass("team-sm").attr("title"), // get the <img> by class and take the title attribute
-        record = el.text, // this is the body of the table. we will need to strip out the date before and after it to prettify it
-        date = el.getElementsByClass("only-mobile").text // because the "only-mobile" divs contain this
+        record = el.text.replace(date, ""), // this is the body of the table. we will need to strip out the date before and after it to prettify it // remove the date as it is in other variable
+        date = date
       )
     }).toList
   }
@@ -64,6 +71,9 @@ object Scraper extends LazyLogging {
   }
   val pageExtensions: List[String] = (for (i <- 1 to upperPageCount) yield baseURL + s"?page=$i").toList
 
+  def getPageExtensions(startPage: Int, endPage: Int): List[String] = {
+    (for (i <- startPage to endPage) yield baseURL + s"?page=$i").toList
+  }
 //  val starterList: List[TransactionRow] = getToTransactionRows(baseURL)
 
   def parallelPageRetrieval(urlList: List[String], parallelismCount: Int = 150): ParSeq[TransactionRow] = {
@@ -74,5 +84,9 @@ object Scraper extends LazyLogging {
       println(s"Consumed ${pageRows.length} rows between ${pageRows.last.date} and ${pageRows.head.date}") // logging
       pageRows
     })
+  }
+
+  def getApiRequest(req: PageRequest): List[TransactionRow] = {
+    parallelPageRetrieval(getPageExtensions(req.pageMin, req.pageMax), req.parellism).toList
   }
 }

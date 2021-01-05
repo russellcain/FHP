@@ -17,7 +17,7 @@ import com.cain.util.general.{ConfigHelper, CorsSupport}
 import com.cain.util.AkkaService
 import com.cain.persistence.Tables._
 import com.cain.trades.Scraper
-import com.cain.trades.Scraper.TransactionRow
+import com.cain.trades.Scraper.{TransactionRow, PageRequest}
 import com.cain.util.marshalling.JSON
 import spray.json.DefaultJsonProtocol._
 
@@ -41,9 +41,10 @@ object AppStarter extends App with AkkaService with Persistence with CorsSupport
               get {
                 println(s"pulling in stats for player id: ${id}")
                 val resp: Source[PlayersRow, NotUsed] = streaming(PlayerPersistence.byId(id))
-                complete(s"todo: ${id}")//resp)
+                complete(s"todo: ${id}") //resp)
               }
-            }}
+            }
+            }
           )
         },
         pathPrefix("user") {
@@ -52,27 +53,28 @@ object AppStarter extends App with AkkaService with Persistence with CorsSupport
               get {
                 println(s"pulling in stats for user id: ${id}")
                 val resp: Source[UsersRow, NotUsed] = streaming(UserPersistence.byId(id))
-                complete(s"todo: ${id}")//resp)
+                complete(s"todo: ${id}") //resp)
               }
-            }}
+            }
+            }
           )
         },
         pathPrefix("transactions") {
-          concat(
-            get {
-              println(s"grabbing recent ${scraper.upperPageCount * 50} entries")
-              val resp: List[TransactionRow] = scraper.parallelPageRetrieval(scraper.pageExtensions).toList
+          post {
+            entity(as[PageRequest]) { pageRequest =>
+              println(s"grabbing entries from page ${pageRequest}")
+              val resp: List[TransactionRow] = scraper.getApiRequest(pageRequest)
               complete(resp)
             }
-          )
+          }
         }
       )
     }
   }
 
-    private val address = ConfigHelper.getStringValue("application.addressString")
-    private val port = ConfigHelper.getIntValue("application.portInt")
-    val bindingFuture = Http().bindAndHandle(corsHandler(route), "0.0.0.0", port) // can still call locally using localhost:8080 (or whatever port is)
-    logger.info(s"Fantasy Hockey Project running on $address : $port")
-    println(s"Fantasy Hockey Project running on $address : $port")
-  }
+  private val address = ConfigHelper.getStringValue("application.addressString")
+  private val port = ConfigHelper.getIntValue("application.portInt")
+  val bindingFuture = Http().bindAndHandle(corsHandler(route), "0.0.0.0", port) // can still call locally using localhost:8080 (or whatever port is)
+  logger.info(s"Fantasy Hockey Project running on $address : $port")
+  println(s"Fantasy Hockey Project running on $address : $port")
+}
